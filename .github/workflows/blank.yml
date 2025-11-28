@@ -23,12 +23,25 @@ jobs:
         with:
           java-version: '11'
 
-      # Android SDK Setup
-      - name: Set up Android SDK
-        uses: reactivecircus/android-sdk-setup@v2
-        with:
-          api-level: 30  # Ziel-API-Level, das du anpassen kannst
-          build-tools: 30.0.3  # Build-Tools-Version
+      # Installieren und Setup des Android SDK
+      - name: Install Android SDK
+        run: |
+          # Installiere benötigte Pakete für das Android SDK
+          sudo apt-get update -y
+          sudo apt-get install -y wget unzip openjdk-11-jdk
+
+          # Installiere Android SDK Tools und Build-Tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip
+          unzip commandlinetools-linux-7583922_latest.zip -d $HOME/Android
+          rm commandlinetools-linux-7583922_latest.zip
+
+          # Setze Umgebungsvariablen
+          echo "export ANDROID_HOME=$HOME/Android" >> $GITHUB_ENV
+          echo "export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> $GITHUB_ENV
+
+          # Akzeptiere Lizenzen und installiere API Level und Build-Tools
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-30" "build-tools;30.0.3"
 
       # Abhängigkeiten mit Gradle installieren
       - name: Install dependencies
